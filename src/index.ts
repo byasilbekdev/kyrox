@@ -9,7 +9,20 @@ async function bootstrap() {
   await bot.start();
 }
 
-bootstrap().catch((error) => {
+process.once("SIGINT", async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.once("SIGTERM", async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+bootstrap().catch(async (error) => {
   console.error(error);
+
+  await prisma.$disconnect;
+
   process.exit(1);
 });
