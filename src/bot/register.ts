@@ -24,9 +24,7 @@ export function register(bot: Bot<BotContext>): void {
 
   bot.use(maintenanceMiddleware);
 
-  console.log("REGISTER START");
   registerStartCommand(bot);
-  console.log("REGISTER END");
   
   registerHelpCommand(bot);
   registerAdminCommand(bot);
