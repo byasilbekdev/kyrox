@@ -67,14 +67,13 @@ export function registerAdminInputHandler(bot: Bot<BotContext>): void {
         }
 
         case "AWAITING_CHANNEL_ID": {
-          // Handled by channel handler; kept here only to satisfy exhaustiveness.
           break;
         }
       }
     } catch (error) {
       if (error instanceof ValidationError) {
         await ctx.reply(`⚠️ ${error.message}`);
-        return; // keep the pending step active so the owner can retry
+        return;
       }
       throw error;
     }

@@ -28,10 +28,6 @@ function buildMessages(request: AiCompletionRequest): OpenRouterMessage[] {
   return messages;
 }
 
-/**
- * Streams completion chunks via an async generator. Caller decides
- * how to forward chunks (e.g. periodic Telegram message edits).
- */
 export async function* streamOpenRouter(
   request: AiCompletionRequest
 ): AsyncGenerator<string, void, unknown> {

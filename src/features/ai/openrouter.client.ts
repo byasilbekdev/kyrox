@@ -82,9 +82,6 @@ export async function callOpenRouter(request: AiCompletionRequest): Promise<AiCo
       if (!response.ok) {
         const errorText = await response.text();
 
-        // Retry only on transient failures — 429 (rate limited) and
-        // 5xx (upstream server error). Client errors (4xx besides 429)
-        // will not succeed on retry, so fail immediately.
         if (response.status === 429 || response.status >= 500) {
           throw new Error(`OpenRouter transient error ${response.status}: ${errorText}`);
         }

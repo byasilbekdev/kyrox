@@ -1,10 +1,6 @@
 import { conversationRepository } from "./conversation.repository.js";
 import type { AppendMessageInput, ChatMessage } from "./conversation.types.js";
 
-// Once a conversation exceeds this many stored messages, we summarize
-// the older ones and prune, keeping only the most recent window plus
-// the running summary — this bounds token usage on every AI call
-// regardless of how long the conversation has been going.
 const SUMMARIZE_THRESHOLD = 30;
 const KEEP_RECENT_MESSAGES = 12;
 
@@ -31,11 +27,6 @@ export const conversationService = {
     return { conversation, message };
   },
 
-  /**
-   * Builds the context window sent to the AI: an optional running
-   * summary of older turns, followed by the most recent raw messages.
-   * This is what "never send entire history" means in practice.
-   */
   async buildContextWindow(conversationId: string, maxRecentMessages = 20): Promise<{
     summary: string | null;
     recentMessages: ChatMessage[];
@@ -54,11 +45,6 @@ export const conversationService = {
     };
   },
 
-  /**
-   * Call after appending a new message. Decides whether the
-   * conversation has grown large enough to need summarization,
-   * and if so, delegates to the AI summarizer and prunes.
-   */
   async maybeCompactConversation(
     conversationId: string,
     summarize: (messages: ChatMessage[], existingSummary: string | null) => Promise<string>

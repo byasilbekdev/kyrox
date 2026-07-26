@@ -3,7 +3,7 @@ import type { Api } from "grammy";
 import { prisma } from "../../database/prisma.js";
 import { logger } from "../../utils/logger.js";
 
-const SEND_DELAY_MS = 50; // stay comfortably under Telegram's ~30 msg/sec cap
+const SEND_DELAY_MS = 50;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));

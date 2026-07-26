@@ -13,28 +13,26 @@ import { userMiddleware } from "./middlewares/user.middleware.js";
 import { redisSessionStorage } from "./session.storage.js";
 
 export function register(bot: Bot<BotContext>): void {
-  // ── Global middleware chain (order matters) ───────────────
   bot.use(loggerMiddleware);
-  bot.use(session<BotSessionData, BotContext>({
-    initial: (): BotSessionData => ({}),
-    storage: redisSessionStorage,
-  }));
+  bot.use(
+    session<BotSessionData, BotContext>({
+      initial: (): BotSessionData => ({}),
+      storage: redisSessionStorage,
+    }),
+  );
   bot.use(userMiddleware);
 
-  // Maintenance gate applies to visitor traffic only; admin routes
-  // below still work because requireOwner runs independently and
-  // the owner is exempted inside maintenanceMiddleware itself.
   bot.use(maintenanceMiddleware);
 
-  // ── Commands ───────────────────────────────────────────────
+  console.log("REGISTER START");
   registerStartCommand(bot);
+  console.log("REGISTER END");
+  
   registerHelpCommand(bot);
   registerAdminCommand(bot);
 
-  // ── Admin panel (callback queries + pending text input) ─────
   registerAdminHandlers(bot);
   registerAdminInputHandler(bot);
 
-  // ── Fallback: visitor AI conversation ───────────────────────
   registerMessageHandler(bot);
 }

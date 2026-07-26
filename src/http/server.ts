@@ -39,8 +39,6 @@ export function createServer(): Express {
       .json({ status: healthy ? "ok" : "degraded", checks });
   });
 
-  // Webhook path is not the bare bot token to avoid leaking it in
-  // request logs / reverse-proxy access logs.
   app.post(
     "/webhook/kyrox",
     webhookCallback(bot, "express", {

@@ -24,10 +24,6 @@ export const ownerService = {
     await invalidateCache(cacheKey("owner", telegramId.toString()));
   },
 
-  /**
-   * Idempotent bootstrap: ensures the BOOTSTRAP_OWNER_TELEGRAM_ID user
-   * has an Owner profile. Runs once on process startup.
-   */
   async bootstrapFirstOwner(): Promise<void> {
     const hasOwner = await ownerRepository.existsAny();
     if (hasOwner) return;
