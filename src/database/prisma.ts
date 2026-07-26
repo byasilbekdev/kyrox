@@ -1,15 +1,37 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/prisma/index.js";
 
-declare global {
-  var prisma: PrismaClient | undefined;
+import { env } from "../config/env.js";
+import { logger } from "../utils/logger.js";
+
+export const prisma = new PrismaClient({
+  log:
+    env.NODE_ENV === "development"
+      ? [
+          { emit: "event", level: "query" },
+          { emit: "stdout", level: "warn" },
+          { emit: "stdout", level: "error" },
+        ]
+      : [
+          { emit: "stdout", level: "warn" },
+          { emit: "stdout", level: "error" },
+        ],
+});
+
+if (env.NODE_ENV === "development") {
+  prisma.$on("query" as never, (...args: unknown[]) => {
+    const e = args[0] as { query: string; duration: number };
+    if (e.duration > 200) {
+      logger.warn("Slow query detected", { query: e.query, durationMs: e.duration });
+    }
+  });
 }
 
-export const prisma =
-  globalThis.prisma ??
-  new PrismaClient({
-    log: ["warn", "error"],
-  });
+export async function connectDatabase(): Promise<void> {
+  await prisma.$connect();
+  logger.info("Database connected");
+}
 
-if (process.env.NODE_ENV !== "production") {
-  globalThis.prisma = prisma;
+export async function disconnectDatabase(): Promise<void> {
+  await prisma.$disconnect();
+  logger.info("Database disconnected");
 }

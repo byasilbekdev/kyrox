@@ -1,81 +1,245 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+// ════════════════════════════════════════════════════════
+// ENUMS
+// ════════════════════════════════════════════════════════
+
 enum UserRole {
   USER
   ADMIN
 }
 
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum AdminAction {
+  AI_TOGGLED
+  PROMPT_UPDATED
+  MODEL_UPDATED
+  TEMPERATURE_UPDATED
+  MAX_TOKENS_UPDATED
+  BROADCAST_SENT
+  CONVERSATION_EXPORTED
+  PROMPT_IMPORTED
+  ACCOUNT_CONNECTED
+  ACCOUNT_DISCONNECTED
+  MAINTENANCE_TOGGLED
+  CHANNEL_ADDED
+  CHANNEL_REMOVED
+  OWNER_SETTINGS_UPDATED
+}
+
+// ════════════════════════════════════════════════════════
+// USER — every Telegram account that interacts with the bot
+// (visitors AND owners both have a User row; Owner is a
+// separate profile a User can optionally hold).
+// ════════════════════════════════════════════════════════
+
 model User {
-  id            String   @id @default(cuid())
+  id           String   @id @default(cuid())
 
-  telegramId    BigInt   @unique
-  username      String?
-  firstName     String
-  lastName      String?
-  languageCode  String?
+  telegramId   BigInt   @unique
+  username     String?
+  firstName    String
+  lastName     String?
+  languageCode String?
 
-  role          UserRole @default(USER)
+  role         UserRole @default(USER)
 
-  isPremium     Boolean  @default(false)
-  isBot         Boolean  @default(false)
-  isBlocked     Boolean  @default(false)
+  isPremium    Boolean  @default(false)
+  isBot        Boolean  @default(false)
+  isBlocked    Boolean  @default(false)
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  lastSeenAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  settings      Settings?
-  prompt        Prompt?
-  conversations Conversation[]
+  // A User may optionally also be an Owner (1:1, optional).
+  owner        Owner?
+
+  // Conversations where this User is the visitor talking to
+  // some Owner's bot persona.
+  conversationsAsVisitor Conversation[] @relation("VisitorConversations")
+
+  @@index([role])
+  @@index([isBlocked])
+  @@map("users")
 }
 
-model Settings {
-  id            String   @id @default(cuid())
+// ════════════════════════════════════════════════════════
+// OWNER — a distinct domain root. Deliberately NOT merged
+// into User: an Owner has its own AI config, prompt, channels,
+// conversations and statistics, independent of the User's
+// identity fields. Isolation between owners is enforced at
+// the repository layer by always scoping queries on ownerId.
+// ════════════════════════════════════════════════════════
 
-  aiEnabled     Boolean  @default(true)
+model Owner {
+  id                 String   @id @default(cuid())
 
-  aiModel       String
+  // Link back to the underlying Telegram identity.
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  temperature   Float    @default(0.7)
+  isActive           Boolean  @default(true)
+  maintenanceMode    Boolean  @default(false)
 
-  maxTokens     Int      @default(1000)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  language      String   @default("uz")
+  prompt             Prompt?
+  settings           Settings?
+  conversations      Conversation[]
+  channels           Channel[]
+  adminLogs          AdminLog[]
 
-  userId        String   @unique
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([isActive])
+  @@map("owners")
 }
+
+// ════════════════════════════════════════════════════════
+// PROMPT — the Owner's system prompt fed to the AI.
+// ════════════════════════════════════════════════════════
 
 model Prompt {
-  id            String   @id @default(cuid())
+  id           String   @id @default(cuid())
 
-  systemPrompt  String   @db.Text
+  systemPrompt String   @db.Text
+  isDefault    Boolean  @default(false)
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  userId        String   @unique
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ownerId      String   @unique
+  owner        Owner    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@map("prompts")
 }
 
+// ════════════════════════════════════════════════════════
+// SETTINGS — the Owner's AI + bot behavior configuration.
+// ════════════════════════════════════════════════════════
+
+model Settings {
+  id          String   @id @default(cuid())
+
+  aiEnabled   Boolean  @default(true)
+  aiModel     String
+  temperature Float    @default(0.7)
+  maxTokens   Int      @default(1000)
+  language    String   @default("uz")
+
+  updatedAt   DateTime @updatedAt
+
+  ownerId     String   @unique
+  owner       Owner    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@map("settings")
+}
+
+// ════════════════════════════════════════════════════════
+// CONVERSATION — one thread per (owner, visitor) pair.
+// ════════════════════════════════════════════════════════
+
 model Conversation {
-  id            String   @id @default(cuid())
-
-  visitorId     BigInt
-
-  summary       String?  @db.Text
-
-  lastMessageAt DateTime @default(now())
-
-  createdAt     DateTime @default(now())
+  id            String    @id @default(cuid())
 
   ownerId       String
-  owner         User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner         Owner     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  visitorId     String
+  visitor       User      @relation("VisitorConversations", fields: [visitorId], references: [id], onDelete: Cascade)
+
+  summary       String?   @db.Text
+
+  lastMessageAt DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+
+  messages      Message[]
 
   @@unique([ownerId, visitorId])
+  @@index([ownerId, lastMessageAt])
+  @@map("conversations")
+}
+
+// ════════════════════════════════════════════════════════
+// MESSAGE — individual turns within a Conversation.
+// Kept separate from Conversation so history can be paged,
+// summarized, and pruned without touching the parent row.
+// ════════════════════════════════════════════════════════
+
+model Message {
+  id             String       @id @default(cuid())
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role           MessageRole
+  content        String       @db.Text
+
+  // Tokens actually billed for this message, when known —
+  // used for memory/window trimming decisions.
+  tokenCount     Int?
+
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+// ════════════════════════════════════════════════════════
+// CHANNEL — a Telegram channel an Owner connects for
+// membership verification / recommendation.
+// ════════════════════════════════════════════════════════
+
+model Channel {
+  id          String   @id @default(cuid())
+
+  ownerId     String
+  owner       Owner    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  chatId      BigInt
+  title       String
+  username    String?
+
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([ownerId, chatId])
+  @@map("channels")
+}
+
+// ════════════════════════════════════════════════════════
+// ADMIN LOG — audit trail of admin-panel actions per owner.
+// ════════════════════════════════════════════════════════
+
+model AdminLog {
+  id        String      @id @default(cuid())
+
+  ownerId   String
+  owner     Owner       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  action    AdminAction
+
+  // Free-form JSON snapshot of what changed (before/after,
+  // affected ids, etc). Kept loose on purpose — the shape
+  // differs per action and this is audit data, not query data.
+  metadata  Json?
+
+  createdAt DateTime    @default(now())
+
+  @@index([ownerId, createdAt])
+  @@map("admin_logs")
 }
