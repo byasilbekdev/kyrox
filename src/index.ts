@@ -23,21 +23,9 @@ async function bootstrap(): Promise<void> {
 async function startWebhookMode(): Promise<void> {
   const app = createServer();
 
-  await bot.api.setWebhook(
-    `
-    ${env.WEBHOOK_URL}/webhook/kyrox`,
-    {
-      secret_token: env.WEBHOOK_SECRET,
-      allowed_updates: [
-        "message",
-        "callback_query",
-        "business_connection",
-        "business_message",
-        "edited_business_message",
-        "deleted_business_messages",
-      ],
-    },
-  );
+  await bot.api.setWebhook(`${env.WEBHOOK_URL}/webhook/kyrox`.trim(), {
+    secret_token: env.WEBHOOK_SECRET,
+  });
 
   httpServer = app.listen(env.PORT, () => {
     logger.info("HTTP server listening (webhook mode)", { port: env.PORT });
