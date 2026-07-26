@@ -9,13 +9,8 @@ import { rateLimitMiddleware } from "../middlewares/rate-limit.middleware.js";
 
 export function registerMessageHandler(bot: Bot<BotContext>): void {
   bot.on("message:text", rateLimitMiddleware, async (ctx) => {
-    // Admin-panel free-text steps and commands are handled by earlier
-    // middleware in the chain; by the time we get here this is a
-    // genuine visitor question for the AI.
     if (ctx.message.text.startsWith("/")) return;
 
-    // Single-owner-per-bot-instance model: the bootstrap owner is the
-    // one whose AI persona answers every visitor of this bot.
     const owner = await ownerService.getByTelegramId(env.BOOTSTRAP_OWNER_TELEGRAM_ID);
 
     if (!owner || !owner.isActive) {

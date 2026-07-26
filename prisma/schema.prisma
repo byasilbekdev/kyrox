@@ -7,10 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-// ════════════════════════════════════════════════════════
-// ENUMS
-// ════════════════════════════════════════════════════════
-
 enum UserRole {
   USER
   ADMIN
@@ -39,12 +35,6 @@ enum AdminAction {
   OWNER_SETTINGS_UPDATED
 }
 
-// ════════════════════════════════════════════════════════
-// USER — every Telegram account that interacts with the bot
-// (visitors AND owners both have a User row; Owner is a
-// separate profile a User can optionally hold).
-// ════════════════════════════════════════════════════════
-
 model User {
   id           String   @id @default(cuid())
 
@@ -64,11 +54,8 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  // A User may optionally also be an Owner (1:1, optional).
   owner        Owner?
 
-  // Conversations where this User is the visitor talking to
-  // some Owner's bot persona.
   conversationsAsVisitor Conversation[] @relation("VisitorConversations")
 
   @@index([role])
@@ -76,18 +63,9 @@ model User {
   @@map("users")
 }
 
-// ════════════════════════════════════════════════════════
-// OWNER — a distinct domain root. Deliberately NOT merged
-// into User: an Owner has its own AI config, prompt, channels,
-// conversations and statistics, independent of the User's
-// identity fields. Isolation between owners is enforced at
-// the repository layer by always scoping queries on ownerId.
-// ════════════════════════════════════════════════════════
-
 model Owner {
   id                 String   @id @default(cuid())
 
-  // Link back to the underlying Telegram identity.
   userId             String   @unique
   user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -107,10 +85,6 @@ model Owner {
   @@map("owners")
 }
 
-// ════════════════════════════════════════════════════════
-// PROMPT — the Owner's system prompt fed to the AI.
-// ════════════════════════════════════════════════════════
-
 model Prompt {
   id           String   @id @default(cuid())
 
@@ -125,10 +99,6 @@ model Prompt {
 
   @@map("prompts")
 }
-
-// ════════════════════════════════════════════════════════
-// SETTINGS — the Owner's AI + bot behavior configuration.
-// ════════════════════════════════════════════════════════
 
 model Settings {
   id          String   @id @default(cuid())
@@ -146,10 +116,6 @@ model Settings {
 
   @@map("settings")
 }
-
-// ════════════════════════════════════════════════════════
-// CONVERSATION — one thread per (owner, visitor) pair.
-// ════════════════════════════════════════════════════════
 
 model Conversation {
   id            String    @id @default(cuid())
@@ -172,12 +138,6 @@ model Conversation {
   @@map("conversations")
 }
 
-// ════════════════════════════════════════════════════════
-// MESSAGE — individual turns within a Conversation.
-// Kept separate from Conversation so history can be paged,
-// summarized, and pruned without touching the parent row.
-// ════════════════════════════════════════════════════════
-
 model Message {
   id             String       @id @default(cuid())
 
@@ -196,11 +156,6 @@ model Message {
   @@index([conversationId, createdAt])
   @@map("messages")
 }
-
-// ════════════════════════════════════════════════════════
-// CHANNEL — a Telegram channel an Owner connects for
-// membership verification / recommendation.
-// ════════════════════════════════════════════════════════
 
 model Channel {
   id          String   @id @default(cuid())
@@ -221,10 +176,6 @@ model Channel {
   @@map("channels")
 }
 
-// ════════════════════════════════════════════════════════
-// ADMIN LOG — audit trail of admin-panel actions per owner.
-// ════════════════════════════════════════════════════════
-
 model AdminLog {
   id        String      @id @default(cuid())
 
@@ -233,9 +184,6 @@ model AdminLog {
 
   action    AdminAction
 
-  // Free-form JSON snapshot of what changed (before/after,
-  // affected ids, etc). Kept loose on purpose — the shape
-  // differs per action and this is audit data, not query data.
   metadata  Json?
 
   createdAt DateTime    @default(now())

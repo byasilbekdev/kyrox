@@ -1,13 +1,16 @@
-import { PrismaClient } from "../generated/prisma/index.js";
+import { PrismaClient } from "../generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
 
+const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
+
 export const prisma = new PrismaClient({
+  adapter,
   log:
     env.NODE_ENV === "development"
       ? [
-          { emit: "event", level: "query" },
           { emit: "stdout", level: "warn" },
           { emit: "stdout", level: "error" },
         ]
@@ -21,7 +24,10 @@ if (env.NODE_ENV === "development") {
   prisma.$on("query" as never, (...args: unknown[]) => {
     const e = args[0] as { query: string; duration: number };
     if (e.duration > 200) {
-      logger.warn("Slow query detected", { query: e.query, durationMs: e.duration });
+      logger.warn("Slow query detected", {
+        query: e.query,
+        durationMs: e.duration,
+      });
     }
   });
 }

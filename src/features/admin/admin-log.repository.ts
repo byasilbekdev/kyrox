@@ -1,5 +1,5 @@
 import { prisma } from "../../database/prisma.js";
-import type { AdminAction, Prisma } from "../../generated/prisma/index.js";
+import type { AdminAction, Prisma } from "../../generated/prisma/client.js";
 
 export const adminLogRepository = {
   async record(ownerId: string, action: AdminAction, metadata?: Prisma.InputJsonValue) {

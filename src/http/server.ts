@@ -34,7 +34,9 @@ export function createServer(): Express {
     }
 
     const healthy = checks.database && checks.redis;
-    res.status(healthy ? 200 : 503).json({ status: healthy ? "ok" : "degraded", checks });
+    res
+      .status(healthy ? 200 : 503)
+      .json({ status: healthy ? "ok" : "degraded", checks });
   });
 
   // Webhook path is not the bare bot token to avoid leaking it in
@@ -43,7 +45,7 @@ export function createServer(): Express {
     "/webhook/kyrox",
     webhookCallback(bot, "express", {
       secretToken: env.WEBHOOK_SECRET,
-    })
+    }),
   );
 
   return app;

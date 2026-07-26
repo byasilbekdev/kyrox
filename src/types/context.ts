@@ -1,6 +1,6 @@
 import type { Context, SessionFlavor } from "grammy";
 
-import type { User } from "../generated/prisma/index.js";
+import type { User } from "../generated/prisma/client.js";
 
 export type PendingAdminStep =
   | "AWAITING_PROMPT"
