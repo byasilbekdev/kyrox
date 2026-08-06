@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toast";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import { ThemeProvider } from "@/components/theme-provider";
+import { cn } from "@/lib/utils";
+import "./globals.css";
 
 const geist = Geist({
   variable: "--font-geist",
@@ -16,18 +20,18 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://bysynapso.vercel.app"),
+  metadataBase: new URL("https://asiliko.vercel.app"),
 
   title: {
-    default: "BySynapso – Next-Generation AI Assistant",
-    template: "%s | BySynapso",
+    default: "Asiliko – Next-Generation AI Assistant",
+    template: "%s | Asiliko",
   },
 
   description:
-    "BySynapso is a next-generation AI platform designed for intelligent conversations, coding, writing, research, translation, and productivity. Experience fast, secure, and powerful artificial intelligence in one place.",
+    "Asiliko is a next-generation AI platform designed for intelligent conversations, coding, writing, research, translation, and productivity. Experience fast, secure, and powerful artificial intelligence in one place.",
 
   keywords: [
-    "BySynapso",
+    "Asiliko",
     "AI",
     "AI Assistant",
     "Artificial Intelligence",
@@ -42,12 +46,23 @@ export const metadata: Metadata = {
     "Productivity",
     "Next.js",
     "Open Source AI",
+    "ai chat",
+    "ai",
+    "asiliko ai login",
+    "asiliko website",
+    "chat asiliko",
+    "chat",
+    "chatai",
+    "asiliko chat",
+    "asiliko login",
+    "chat",
+    "asiliko",
   ],
 
-  authors: [{ name: "BySynapso Team" }],
-  creator: "BySynapso",
-  publisher: "BySynapso",
-  applicationName: "BySynapso",
+  authors: [{ name: "Asilbek Egamnazarov" }],
+  creator: "Asilbek Egamnazarov",
+  publisher: "Asiliko",
+  applicationName: "Asiliko",
   category: "Technology",
 
   robots: {
@@ -69,28 +84,18 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "BySynapso",
-    url: "https://bysynapso.vercel.app",
-    title: "BySynapso – Next-Generation AI Assistant",
+    siteName: "Asiliko",
+    url: "https://asiliko.vercel.app",
+    title: "Asiliko – Next-Generation AI Assistant",
     description:
       "Your intelligent AI assistant for chatting, coding, writing, research, and productivity.",
-
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "BySynapso AI",
-      },
-    ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "BySynapso – Next-Generation AI Assistant",
+    title: "Asiliko – Next-Generation AI Assistant",
     description:
       "Powerful AI for coding, writing, research, and intelligent conversations.",
-    images: ["/og-image.png"],
   },
 
   icons: {
@@ -116,14 +121,36 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const newLocal =
+    "h-[calc(100vh-16px)] rounded-lg lg:bg-card lg:border shadow-sm py-2.5 pr-5 overflow-hidden";
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={cn(
+        "h-full",
+        "antialiased",
+        geist.variable,
+        jetbrainsMono.variable,
+      )}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <TooltipProvider>{children}</TooltipProvider>
-        <Toaster />
+        <ThemeProvider
+          attribute={"class"}
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>
+            <SidebarProvider>
+              <AppSidebar />
+              <SidebarInset className="py-2 pr-2">
+                <main className={newLocal}>{children}</main>
+              </SidebarInset>
+            </SidebarProvider>
+          </TooltipProvider>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

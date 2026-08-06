@@ -1,5 +1,11 @@
+import { ModeToggle } from "@/components/mode-toggle";
+
 const page = () => {
-  return <div>page</div>;
+  return (
+    <div>
+      <ModeToggle />
+    </div>
+  );
 };
 
 export default page;
