@@ -12,6 +12,7 @@ import {
   useState,
 } from "react"
 import { createPortal } from "react-dom"
+import { Button } from "./button"
 
 type FileUploadContextValue = {
   isDragging: boolean
@@ -61,6 +62,7 @@ function FileUpload({
 
     const handleDragIn = (e: DragEvent) => {
       handleDrag(e)
+      if (disabled) return
       dragCounter.current++
       if (e.dataTransfer?.items.length) setIsDragging(true)
     }
@@ -75,6 +77,7 @@ function FileUpload({
       handleDrag(e)
       setIsDragging(false)
       dragCounter.current = 0
+      if (disabled) return
       if (e.dataTransfer?.files.length) {
         handleFiles(e.dataTransfer.files)
       }
@@ -150,14 +153,14 @@ function FileUploadTrigger({
   }
 
   return (
-    <button
+    <Button
       type="button"
       className={className}
       onClick={handleClick}
       {...props}
     >
       {children}
-    </button>
+    </Button>
   )
 }
 

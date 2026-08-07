@@ -122,7 +122,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const newLocal =
-    "h-[calc(100dvh-16px)] rounded-lg lg:bg-card lg:border shadow-sm py-2.5 pr-5";
+    "h-[calc(100dvh-16px)] rounded-lg lg:bg-card lg:border shadow-sm p-2.5";
   return (
     <html
       lang="en"
@@ -145,7 +145,7 @@ export default function RootLayout({
             <SidebarProvider>
               <AppSidebar />
               <SidebarInset className="py-2 pr-2">
-                <main className={newLocal}>{children}</main>
+                <section className={newLocal}>{children}</section>
               </SidebarInset>
             </SidebarProvider>
           </TooltipProvider>

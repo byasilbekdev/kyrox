@@ -34,18 +34,19 @@ export const Image = ({
 }: ImageProps) => {
   const [objectUrl, setObjectUrl] = useState<string | undefined>(undefined)
 
-  useEffect(() => {
-    if (uint8Array && mediaType) {
-      const blob = new Blob([uint8Array as BlobPart], { type: mediaType })
-      const url = URL.createObjectURL(blob)
-      setObjectUrl(url)
-      return () => {
-        URL.revokeObjectURL(url)
-      }
-    }
-    setObjectUrl(undefined)
-    return
-  }, [uint8Array, mediaType])
+useEffect(() => {
+  if (!base64 && uint8Array && mediaType) {
+    const bytes = uint8Array instanceof Uint8Array
+      ? uint8Array
+      : new Uint8Array(uint8Array)
+    const blob = new Blob([bytes], { type: mediaType })
+    const url = URL.createObjectURL(blob)
+    setObjectUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }
+  setObjectUrl(undefined)
+  return
+}, [base64, uint8Array, mediaType])
 
   const base64Src = getImageSrc({ base64, mediaType })
   const src = base64Src ?? objectUrl
@@ -65,7 +66,7 @@ export const Image = ({
   }
 
   return (
-    <img
+    <Image
       src={src}
       alt={alt}
       className={cn("h-auto max-w-full overflow-hidden rounded-md", className)}

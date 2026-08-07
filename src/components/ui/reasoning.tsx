@@ -10,6 +10,7 @@ import React, {
   useState,
 } from "react"
 import { Markdown } from "./markdown"
+import { Button } from "./button"
 
 type ReasoningContextType = {
   isOpen: boolean
@@ -94,7 +95,7 @@ function ReasoningTrigger({
   const { isOpen, onOpenChange } = useReasoningContext()
 
   return (
-    <button
+    <Button
       className={cn("flex cursor-pointer items-center gap-2", className)}
       onClick={() => onOpenChange(!isOpen)}
       {...props}
@@ -108,7 +109,7 @@ function ReasoningTrigger({
       >
         <ChevronDownIcon className="size-4" />
       </div>
-    </button>
+    </Button>
   )
 }
 
