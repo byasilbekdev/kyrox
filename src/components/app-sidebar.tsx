@@ -1,5 +1,11 @@
 "use client";
 
+import SidebarToggle from "./sidebar-toggle";
+import Link from "next/link";
+import { Button } from "./ui/button";
+import { AppPopover } from "./app-popover/app-popover";
+import { Separator } from "@/components/ui/separator";
+
 import {
   Sidebar,
   SidebarContent,
@@ -8,20 +14,15 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
+  SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import SidebarToggle from "./sidebar-toggle";
-import Link from "next/link";
-import { Button } from "./ui/button";
 import {
-  FolderGit,
   Images,
   MessageSquarePlus,
   MessagesSquare,
   Search,
 } from "@/icons/icon";
-import { AppPopover } from "./app-popover";
-import { Separator } from "@/components/ui/separator";
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -35,7 +36,7 @@ export function AppSidebar() {
         )}
         <div className="flex items-center gap-2">
           {state === "expanded" && (
-            <Button variant={"ghost"} size={"icon"}>
+            <Button variant={"ghost"} size={"icon"} aria-label="Search">
               <Search className="size-4.5" />
             </Button>
           )}
@@ -46,43 +47,35 @@ export function AppSidebar() {
       <SidebarContent className="flex flex-col min-h-0 overflow-hidden">
         <SidebarGroup className="shrink-0 flex flex-col gap-1">
           <SidebarMenu>
-            <SidebarMenuButton>
-              <MessageSquarePlus
-                className={state === "collapsed" ? "size-4.5" : "size-4.5"}
-              />{" "}
-              {state === "expanded" && "New chat"}
-            </SidebarMenuButton>
-          </SidebarMenu>
-          <SidebarMenu>
-            <SidebarMenuButton>
-              <MessagesSquare
-                className={state === "collapsed" ? "size-4.5" : "size-4.5"}
-              />{" "}
-              {state === "expanded" && "Chats"}
-            </SidebarMenuButton>
-          </SidebarMenu>
-          <SidebarMenu>
-            <SidebarMenuButton>
-              <Images
-                className={state === "collapsed" ? "size-4.5" : "size-4.5"}
-              />{" "}
-              {state === "expanded" && "Images"}
-            </SidebarMenuButton>
-          </SidebarMenu>
-          <SidebarMenu>
-            <SidebarMenuButton>
-              <FolderGit
-                className={state === "collapsed" ? "size-4.5" : "size-4.5"}
-              />
-              {state === "expanded" && "Projects"}
-            </SidebarMenuButton>
+            <SidebarMenuItem>
+              <Link href={"/"}>
+                <SidebarMenuButton>
+                  <MessageSquarePlus className="size-4.5" />{" "}
+                  {state === "expanded" && "New chat"}
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <Link href={"/images"}>
+                <SidebarMenuButton>
+                  {" "}
+                  <Images className="size-4.5" />{" "}
+                  {state === "expanded" && "Images"}
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <MessagesSquare className="size-4.5" />{" "}
+                {state === "expanded" && "Chats"}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
-        <Separator />
         {state === "expanded" && (
-          <SidebarGroup className="min-h-0 flex-1 overflow-y-scroll custom-scrollbar">
-            dfg
-          </SidebarGroup>
+          <SidebarGroup className="min-h-0 flex-1 overflow-y-scroll custom-scrollbar"></SidebarGroup>
         )}
       </SidebarContent>
       <Separator />

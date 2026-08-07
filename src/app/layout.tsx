@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toast";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -8,8 +8,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
-const geist = Geist({
-  variable: "--font-geist",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin", "cyrillic"],
 });
 
@@ -122,14 +122,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const newLocal =
-    "h-[calc(100vh-16px)] rounded-lg lg:bg-card lg:border shadow-sm py-2.5 pr-5 overflow-hidden";
+    "h-[calc(100dvh-16px)] rounded-lg lg:bg-card lg:border shadow-sm py-2.5 pr-5";
   return (
     <html
       lang="en"
       className={cn(
         "h-full",
         "antialiased",
-        geist.variable,
+        inter.variable,
         jetbrainsMono.variable,
       )}
       suppressHydrationWarning

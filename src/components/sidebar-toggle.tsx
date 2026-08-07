@@ -1,8 +1,6 @@
-"use client";
-
 import { PanelLeftIcon, PanelRightIcon } from "@/icons/icon";
 import { Button } from "./ui/button";
-import { useSidebar } from "./ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 
 const SidebarToggle = ({ className }: React.ComponentProps<typeof Button>) => {
   const { open, toggleSidebar } = useSidebar();
@@ -12,6 +10,7 @@ const SidebarToggle = ({ className }: React.ComponentProps<typeof Button>) => {
       size="icon"
       onClick={toggleSidebar}
       className={className}
+      aria-label="Sidebar open or close"
     >
       {open ? (
         <PanelLeftIcon className="size-5" />
